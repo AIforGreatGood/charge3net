@@ -1,0 +1,8 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+_target_: src.charge3net.data.graph_construction.AsapAseGraphConstructor
+_partial_: True
+
+cutoff: 4.0
+disable_pbc: False
+probe_batch_size: 25

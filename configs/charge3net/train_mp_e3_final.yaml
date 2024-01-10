@@ -1,0 +1,75 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+defaults:
+  - model: e3_density
+  - data: mp_data
+  - override hydra/launcher: submitit_slurm
+  - _self_
+
+# number of nodes
+nnodes: 2
+# number of processes/devices per node
+nprocs: 2
+
+# training steps
+steps: 1e6
+
+# (optional) save cubes on test
+cube_dir:
+
+# checkpoint, will resume training if path exists
+checkpoint_path:
+
+# tensorboard, logs, and tmp files
+log_dir: ${hydra:run.dir}
+
+seed: 42
+cutoff: 4.0
+batch_size: 16
+split: "split"
+lr: 0.005
+
+hydra:
+  job:
+    name: mp_e3_final
+  run: 
+    dir: ./results/charge3net/${hydra.job.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${hydra.run.dir}
+
+  launcher:
+    partition: gaia
+    nodes: ${nnodes}
+    tasks_per_node: 1 # note, multiprocessing will handle multitasking per node
+    constraint: xeon-g6
+    timeout_min: 20000
+    additional_parameters:
+      gres: gpu:volta:2
+      exclusive: True
+      distribution: nopack
+  callbacks:
+    log_job_return:
+      _target_: hydra.experimental.callbacks.LogJobReturnCallback
+
+
+data:
+  batch_size: ${batch_size}
+  train_workers: 8
+  val_workers: 8
+  pin_memory: False
+  train_probes: 200
+  val_probes: 400
+  test_probes: 1000
+  split_file: ./data/mp/defaults/${split}.json
+  graph_constructor:
+    cutoff: ${cutoff}
+    disable_pbc: False
+
+
+model:
+  optimizer:
+    lr: ${lr}
+  lr_scheduler:
+    beta: 3e3
+  model:
+    cutoff: ${cutoff}

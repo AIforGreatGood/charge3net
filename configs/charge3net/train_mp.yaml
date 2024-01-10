@@ -1,0 +1,65 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+defaults:
+  - data: mp_data
+  - model: density
+  - override hydra/launcher: submitit_slurm
+  - _self_
+
+# number of nodes
+nnodes: 2
+# number of processes/devices per node
+nprocs: 2
+
+# training steps
+steps: 1e6
+
+# (optional) save cubes on test
+cube_dir:
+
+# checkpoint, will resume training if path exists
+checkpoint_path: 
+
+# tensorboard, logs, and tmp files
+log_dir: ${hydra:run.dir}
+
+seed: 42
+cutoff: 4.0
+batch_size: 16
+split: "split"
+lr: 6e-4
+
+hydra:
+  job:
+    name: mp_charge_density
+  run: 
+    dir: ./results/charge3net/${hydra.job.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${hydra.run.dir}
+
+  launcher:
+    partition: gaia
+    nodes: ${nnodes}
+    tasks_per_node: 1 # note, multiprocessing will handle multitasking per node
+    constraint: xeon-g6
+    timeout_min: 20000
+    additional_parameters:
+      gres: gpu:volta:2
+      exclusive: True
+      distribution: nopack
+  callbacks:
+    log_job_return:
+      _target_: hydra.experimental.callbacks.LogJobReturnCallback
+
+data:
+  batch_size: ${batch_size}
+  graph_constructor:
+    cutoff: ${cutoff}
+
+model:
+  optimizer:
+    lr: ${lr}
+  lr_scheduler:
+    beta: 3e3
+  model:
+    cutoff: ${cutoff}

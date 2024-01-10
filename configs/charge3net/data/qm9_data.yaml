@@ -1,0 +1,23 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+_target_: src.charge3net.data.dataset.DensityDatamodule
+
+defaults:
+  - graph_constructor: kdtree
+
+data_root: ./data/qm9/qm9vasp.txt
+batch_size: 2
+train_workers: 8
+val_workers: 8
+pin_memory: False
+split_file: ./data/qm9/datasplits.json
+train_probes: 500
+val_probes: 1000
+test_probes: 1000
+val_frac: 0.005
+drop_last: True
+grid_size_file: 
+max_grid_construction_size: 10000000
+
+graph_constructor:
+  disable_pbc: True

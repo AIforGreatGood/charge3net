@@ -1,0 +1,7 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+_target_: src.charge3net.data.graph_construction.KdTreeGraphConstructor
+_partial_: True
+
+cutoff: 4.0
+disable_pbc: False

@@ -1,0 +1,23 @@
+# Copyright (c) 2023, MASSACHUSETTS INSTITUTE OF TECHNOLOGY
+# Subject to FAR 52.227-11 - Patent Rights - Ownership by the Contractor (May 2014).
+model: 
+  _target_: src.charge3net.models.densitymodel.PainnDensityModel
+  num_interactions: 3
+  hidden_state_size: 128
+  cutoff: 4.0
+  distance_embedding_size: 30
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+
+lr_scheduler:
+  _target_: src.charge3net.models.scheduler.PowerDecayScheduler
+  _partial_: true
+  alpha: 0.96
+  
+criterion:
+  _target_: torch.nn.MSELoss
+
+batch_size: ${batch_size}
+max_predict_batch_probes: 2500
