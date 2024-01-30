@@ -8,7 +8,7 @@ defaults:
 
 input_dir:  # arbitrary directory containing .npy and .pkl files, with filelist.txt, split.json, and probe_counts.csv 
 lmax: 4
-checkpoint_path: /home/gridsan/groups/ai4bio_shared/materials/charge-density-prediction-results/lmax_sweep/full/${lmax}.ckpt
+checkpoint_path: ./models/charge3net_mp.pt
 cube_dir: ${hydra:run.dir}
 
 # tensorboard, logs, and tmp files

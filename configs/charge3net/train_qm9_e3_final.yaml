@@ -59,7 +59,7 @@ data:
   train_probes: 200
   val_probes: 500
   test_probes: 1000
-  split_file: ./data/qm9/defaults/${split}.json
+  split_file: ./data/qm9/${split}.json
   graph_constructor:
     cutoff: ${cutoff}
     disable_pbc: True

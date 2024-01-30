@@ -60,7 +60,7 @@ data:
   train_probes: 200
   val_probes: 400
   test_probes: 1000
-  split_file: ./data/mp/defaults/${split}.json
+  split_file: ./data/mp/${split}.json
   graph_constructor:
     cutoff: ${cutoff}
     disable_pbc: False
