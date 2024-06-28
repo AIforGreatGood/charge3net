@@ -174,6 +174,9 @@ into `data/qm9`.
 Download from [Jørgensen and Bhowmik](https://data.dtu.dk/articles/dataset/NMC_Li-ion_Battery_Cathode_Energies_and_Charge_Densities/16837721)
 into `data/nmc`.
 
+### GNoME
+
+Structures obtained from [google-deepminde/materials_discovery](https://github.com/google-deepmind/materials_discovery). See `data/gnome/filelist.txt` for the list of file IDs studied in our work.
 
 ## Extra Notes on Testing
 
