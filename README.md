@@ -3,16 +3,20 @@
 
 ![](figure.png)
 
-Official implementation of ChargeE3Net, introduced in [Higher-Order Equivariant Neural Networks for Charge Density Prediction in Materials](https://arxiv.org/abs/2312.05388).
+Official implementation of ChargeE3Net, introduced in [Higher-Order Equivariant Neural Networks for Charge Density Prediction in Materials](https://www.nature.com/articles/s41524-024-01343-1).
 
 ## Citation
 
 ```bibtex
-@article{koker2023higherorder,
-  title={Higher-Order Equivariant Neural Networks for Charge Density Prediction in Materials}, 
-  author={Teddy Koker and Keegan Quigley and Eric Taw and Kevin Tibbetts and Lin Li},
-  journal={arXiv preprint arXiv:2312.05388},
-  year={2023}
+@article{koker2024higher,
+  title={Higher-order equivariant neural networks for charge density prediction in materials},
+  author={Koker, Teddy and Quigley, Keegan and Taw, Eric and Tibbetts, Kevin and Li, Lin},
+  journal={npj Computational Materials},
+  volume={10},
+  number={1},
+  pages={161},
+  year={2024},
+  publisher={Nature Publishing Group UK London}
 }
 ```
 
