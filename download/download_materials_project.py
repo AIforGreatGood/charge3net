@@ -4,6 +4,7 @@ from multiprocessing import pool
 from pathlib import Path
 import argparse
 import json
+from monty.json import MontyDecoder
 from mp_api.client import MPRester
 from emmet.core.summary import HasProps
 from emmet.core.tasks import TaskDoc
@@ -53,10 +54,24 @@ def get_charge_density_and_task_docs_by_task_id(MP_API_KEY: str, task_id: str, d
     
     '''
     with MPRester(MP_API_KEY, monty_decode=deserialize) as mpr:
-        task_doc = mpr.tasks.get_data_by_id(task_id)
-        results = mpr.charge_density.search(task_ids=[task_id])  # type: ignore
-        assert len(results) == 1
-        chgcar = mpr.charge_density.get_charge_density_from_file_id(results[0].fs_id)
+        task_doc = mpr.materials.tasks.get_data_by_id(task_id)
+
+        # work-around to get charge density from task_id. See: 
+        # https://github.com/materialsproject/api/issues/924
+
+        # results = mpr.materials.search(task_ids=[task_id])  # type: ignore
+        # assert len(results) == 1
+        # chgcar = mpr.charge_density.get_charge_density_from_file_id(results[0].fs_id)
+        decoder = MontyDecoder().decode if deserialize else json.loads
+        chgcar = (
+            mpr.tasks._query_open_data(
+                bucket="materialsproject-parsed",
+                key=f"chgcars/{str(task_id)}.json.gz",
+                decoder=decoder,
+                fields=["data"],
+            )[0][0]["data"]
+            or {}
+        )
         return chgcar, task_doc
 
 
@@ -96,7 +111,7 @@ def read_filelist(filename: Union[str, Path]) -> list:
 def _read_in_write_out(mp_api_key: str, mpid: str, outpath: Union[Path, str]):
     outpath=Path(outpath)
     try:
-        chgcar, taskdoc = get_charge_density_with_task_docs(mp_api_key, mpid, deserialize=False)
+        chgcar, taskdoc = get_charge_density_with_task_docs(mp_api_key, mpid, deserialize=True)
     except Exception as e:
         print(e)
         return
@@ -112,7 +127,7 @@ def _read_in_write_out(mp_api_key: str, mpid: str, outpath: Union[Path, str]):
 def _read_in_write_out_task(mp_api_key: str, mpid: str, task_id: str, outpath: Union[Path, str]):
     outpath=Path(outpath)
     try:
-        chgcar, taskdoc = get_charge_density_and_task_docs_by_task_id(mp_api_key, task_id, deserialize=False)
+        chgcar, taskdoc = get_charge_density_and_task_docs_by_task_id(mp_api_key, task_id, deserialize=True)
     except Exception as e:
         print(e)
         return

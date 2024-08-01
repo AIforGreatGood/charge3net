@@ -139,7 +139,7 @@ python download/download_materials_project.py \
 	--out_path ./data/mp_raw \
 	--workers WORKERS \
 	--task_id_file ./data/mpid_to_task_id_map.json \
-	--mpi_api_key <"Your MP API Key">
+	--mp_api_key <"Your MP API Key">
 ```
 
 Optionally, you can exclude the `task_id_file` to download the latest data from materials project, including any updates to the dataset since we obtained a copy. For reproducible results, use the above call.
@@ -148,7 +148,7 @@ Optionally, you can exclude the `task_id_file` to download the latest data from 
 python download/download_materials_project.py \
 	--out_path ./data/mp_raw \
 	--workers WORKERS \
-	--mpi_api_key <"Your MP API Key">
+	--mp_api_key <"Your MP API Key">
 ```
 
 2. Convert the CHGCAR files to numpy and pickle files for faster reading with [scripts/batch_pickle_mp_charge_density.py](./scripts/batch_pickle_mp_charge_density.py)
