@@ -173,10 +173,26 @@ python scripts/write_mp_probe_count_file.py --filelist ./data/mp_raw/filelist.tx
 Download from [Jørgensen and Bhowmik](https://data.dtu.dk/articles/dataset/QM9_Charge_Densities_and_Energies_Calculated_with_VASP/16794500)
 into `data/qm9`.
 
+Create the filelist for training:
+```bash
+cd data/qm9
+ls -1 *.tar > qm9vasp.txt
+```
+
+The data split we used in our work is provided under `data/qm9/datasplits.json`
+
 ### NMC
 
 Download from [Jørgensen and Bhowmik](https://data.dtu.dk/articles/dataset/NMC_Li-ion_Battery_Cathode_Energies_and_Charge_Densities/16837721)
 into `data/nmc`.
+
+Create the filelist for training:
+```bash
+cd data/nmc
+ls -1 *.tar > cellrelax.txt
+```
+
+The data split files will be downloaded with the dataset.
 
 ### GNoME
 
