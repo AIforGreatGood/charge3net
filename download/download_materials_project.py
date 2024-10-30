@@ -4,6 +4,7 @@ from multiprocessing import pool
 from pathlib import Path
 import argparse
 import json
+from monty.json import MontyDecoder
 from mp_api.client import MPRester
 from emmet.core.summary import HasProps
 from emmet.core.tasks import TaskDoc
@@ -20,6 +21,7 @@ parser.add_argument("--limit", type=int, default=0,
 parser.add_argument("--workers", type=int, default=1)
 parser.add_argument("--task_id_file", type=str, help="(optional) json file mapping from `material_id`s to `task_id`s")
 parser.add_argument("--mp_api_key", type=str, help="API Key from materials project")
+parser.add_argument("--download_latest_for_missing_task_id", action="store_true", help="Download latest material id charge density if task id is missing")
 
 
 def get_charge_density_with_task_docs(MP_API_KEY: str, mpid: str, deserialize: bool = False) -> Tuple[Chgcar, TaskDoc]:
@@ -46,24 +48,16 @@ def get_charge_density_with_task_docs(MP_API_KEY: str, mpid: str, deserialize: b
 
 
 def get_charge_density_and_task_docs_by_task_id(MP_API_KEY: str, task_id: str, deserialize: bool = False) -> Tuple[Chgcar, TaskDoc]:
-    r'''Retrieve charge density and the associated TaskDoc, from the task_id
-
-        This requires a few more steps than get_charge_density_with_task_docs, since this is not supported
-        with the existing mp_api package
-    
-    '''
+    r'''Retrieve charge density and the associated TaskDoc, from the task_id'''
     with MPRester(MP_API_KEY, monty_decode=deserialize) as mpr:
-        task_doc = mpr.tasks.get_data_by_id(task_id)
-        results = mpr.charge_density.search(task_ids=[task_id])  # type: ignore
-        assert len(results) == 1
-        chgcar = mpr.charge_density.get_charge_density_from_file_id(results[0].fs_id)
+        chgcar, task_doc = mpr.get_charge_density_from_task_id(task_id, inc_task_doc=True)
         return chgcar, task_doc
 
 
 def get_materials_with_charge_density(MP_API_KEY: str) -> list:
     r'''Returns a list of material ids that have charge density data'''
     with MPRester(MP_API_KEY) as mpr:
-        docs = mpr.summary.search(has_props = [HasProps.charge_density], fields=["material_id"])
+        docs = mpr.materials.summary.search(has_props = [HasProps.charge_density], fields=["material_id"])
     charge_density_mpids = [doc.material_id for doc in docs]
     return charge_density_mpids
 
@@ -96,7 +90,7 @@ def read_filelist(filename: Union[str, Path]) -> list:
 def _read_in_write_out(mp_api_key: str, mpid: str, outpath: Union[Path, str]):
     outpath=Path(outpath)
     try:
-        chgcar, taskdoc = get_charge_density_with_task_docs(mp_api_key, mpid, deserialize=False)
+        chgcar, taskdoc = get_charge_density_with_task_docs(mp_api_key, mpid, deserialize=True)
     except Exception as e:
         print(e)
         return
@@ -109,12 +103,21 @@ def _read_in_write_out(mp_api_key: str, mpid: str, outpath: Union[Path, str]):
         write_task_id_to_txt(taskdoc=taskdoc, root_dir=outpath, mpid=mpid)
         
         
-def _read_in_write_out_task(mp_api_key: str, mpid: str, task_id: str, outpath: Union[Path, str]):
+def _read_in_write_out_task(
+    mp_api_key: str,
+    mpid: str,
+    task_id: str,
+    outpath: Union[Path, str],
+    download_latest_for_missing_task_id: bool = False,
+):
     outpath=Path(outpath)
     try:
-        chgcar, taskdoc = get_charge_density_and_task_docs_by_task_id(mp_api_key, task_id, deserialize=False)
+        chgcar, taskdoc = get_charge_density_and_task_docs_by_task_id(mp_api_key, task_id, deserialize=True)
     except Exception as e:
         print(e)
+        if download_latest_for_missing_task_id:
+            print(f"task id {task_id} failed, falling back to latest calculation for mpid {mpid}")
+            _read_in_write_out(mp_api_key, mpid, outpath)
         return
 
     if chgcar is not None:
@@ -154,11 +157,11 @@ def main(args):
             raise ValueError("Num workers should be less than 5, to avoid strain on MP servers") 
         elif args.workers > 1:
             print(f"Starting API calls with {args.workers} workers...")
-            pool.Pool(args.workers).starmap(_read_in_write_out_task, [(args.mp_api_key, mpid, task_id, args.out_path) for mpid, task_id in zip(mpids, task_ids)])
+            pool.Pool(args.workers).starmap(_read_in_write_out_task, [(args.mp_api_key, mpid, task_id, args.out_path, args.download_latest_for_missing_task_id) for mpid, task_id in zip(mpids, task_ids)])
         else:
             print("Starting API call with a single worker. Add additional workers with --workers")
             for mpid, task_id in zip(mpids, task_ids):
-                _read_in_write_out_task(args.mp_api_key, mpid, task_id, args.out_path)
+                _read_in_write_out_task(args.mp_api_key, mpid, task_id, args.out_path, args.download_latest_for_missing_task_id)
             
             
     else:

@@ -137,10 +137,14 @@ python src/train_from_config.py -cd configs/charge3net -cn train_nmc_e3_final.ya
 ```bash
 python download/download_materials_project.py \
 	--out_path ./data/mp_raw \
-	--workers WORKERS \
+	--workers <number of workers> \
 	--task_id_file ./data/mpid_to_task_id_map.json \
-	--mpi_api_key <"Your MP API Key">
+	--mp_api_key <MP API key>
 ```
+
+**Update 2024:** The Materials Project API has updated their backend, and as a
+result some of the [old task ids are no longer accessable](https://github.com/materialsproject/api/issues/924#issuecomment-2329837586). We have added a flag
+to the above command `--download_latest_for_missing_task_id`, which will download the latest calculations for these missing task ids. Note that this will result in data that is slightly different from our published work.
 
 Optionally, you can exclude the `task_id_file` to download the latest data from materials project, including any updates to the dataset since we obtained a copy. For reproducible results, use the above call.
 
@@ -148,7 +152,7 @@ Optionally, you can exclude the `task_id_file` to download the latest data from 
 python download/download_materials_project.py \
 	--out_path ./data/mp_raw \
 	--workers WORKERS \
-	--mpi_api_key <"Your MP API Key">
+	--mp_api_key <MP API key>
 ```
 
 2. Convert the CHGCAR files to numpy and pickle files for faster reading with [scripts/batch_pickle_mp_charge_density.py](./scripts/batch_pickle_mp_charge_density.py)
