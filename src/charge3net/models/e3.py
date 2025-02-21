@@ -321,7 +321,7 @@ class E3ProbeMessageModel(torch.nn.Module):
 
         # last layer, scalar output
         if spin:
-            out = "2x0e"
+            out = "1x0e+1x0o"
         else:
             out = "0e"
         self.readout = Linear(irreps_node, out)
